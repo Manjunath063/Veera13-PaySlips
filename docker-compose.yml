@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: payslip_backend13
+    build: ./Backend
+    ports:
+      - "3065:3065"
+    depends_on:
+      - postgres
+    networks:
+      - payslip_net
+    environment:
+      - PGUSER=postgres
+      - PGPASSWORD=admin123
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=payroll_db
+
+  frontend:
+    container_name: payslip_frontend13
+    build: ./Frontend
+    ports:
+      - "8114:80"
+    depends_on:
+      - backend
+    networks:
+      - payslip_net
+
+  hr:
+    container_name: payslip_hr13
+    build: ./HR
+    ports:
+      - "8115:80"
+    depends_on:
+      - backend
+    networks:
+      - payslip_net
+
+  payslip:
+    container_name: payslip_ui13
+    build: ./Payslip
+    ports:
+      - "8116:80"
+    depends_on:
+      - backend
+    networks:
+      - payslip_net
+
+  postgres:
+    container_name: payslip_postgres13
+    image: postgres:13
+    ports:
+      - "5465:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: payroll_db
+    volumes:
+      - pgdata13:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - payslip_net
+
+volumes:
+  pgdata13:
+
+networks:
+  payslip_net:
+    driver: bridge
+
